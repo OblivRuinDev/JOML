@@ -25,6 +25,8 @@ package org.joml;
 
 //#ifdef __HAS_NIO__
 import java.nio.*;
+
+import static org.joml.MemUtil$$U2.checkGet;
 //#endif
 
 /**
@@ -73,168 +75,413 @@ abstract class MemUtil {
     }
 
     //#ifdef __HAS_NIO__
-    public void put0(Matrix4f m, FloatBuffer dest) {
-        dest.put(0,  m.m00())
-                .put(1,  m.m01())
-                .put(2,  m.m02())
-                .put(3,  m.m03())
-                .put(4,  m.m10())
-                .put(5,  m.m11())
-                .put(6,  m.m12())
-                .put(7,  m.m13())
-                .put(8,  m.m20())
-                .put(9,  m.m21())
-                .put(10, m.m22())
-                .put(11, m.m23())
-                .put(12, m.m30())
-                .put(13, m.m31())
-                .put(14, m.m32())
-                .put(15, m.m33());
-    }
+    static class NIO {
+        public static void put0(Matrix4f m, FloatBuffer dest) {
+            dest.put(0,  m.m00())
+                    .put(1,  m.m01())
+                    .put(2,  m.m02())
+                    .put(3,  m.m03())
+                    .put(4,  m.m10())
+                    .put(5,  m.m11())
+                    .put(6,  m.m12())
+                    .put(7,  m.m13())
+                    .put(8,  m.m20())
+                    .put(9,  m.m21())
+                    .put(10, m.m22())
+                    .put(11, m.m23())
+                    .put(12, m.m30())
+                    .put(13, m.m31())
+                    .put(14, m.m32())
+                    .put(15, m.m33());
+        }
 
-    public void putN(Matrix4f m, int offset, FloatBuffer dest) {
-        dest.put(offset,    m.m00())
-                .put(offset+1,  m.m01())
-                .put(offset+2,  m.m02())
-                .put(offset+3,  m.m03())
-                .put(offset+4,  m.m10())
-                .put(offset+5,  m.m11())
-                .put(offset+6,  m.m12())
-                .put(offset+7,  m.m13())
-                .put(offset+8,  m.m20())
-                .put(offset+9,  m.m21())
-                .put(offset+10, m.m22())
-                .put(offset+11, m.m23())
-                .put(offset+12, m.m30())
-                .put(offset+13, m.m31())
-                .put(offset+14, m.m32())
-                .put(offset+15, m.m33());
+        public static void putN(Matrix4f m, int offset, FloatBuffer dest) {
+            dest.put(offset,    m.m00())
+                    .put(offset+1,  m.m01())
+                    .put(offset+2,  m.m02())
+                    .put(offset+3,  m.m03())
+                    .put(offset+4,  m.m10())
+                    .put(offset+5,  m.m11())
+                    .put(offset+6,  m.m12())
+                    .put(offset+7,  m.m13())
+                    .put(offset+8,  m.m20())
+                    .put(offset+9,  m.m21())
+                    .put(offset+10, m.m22())
+                    .put(offset+11, m.m23())
+                    .put(offset+12, m.m30())
+                    .put(offset+13, m.m31())
+                    .put(offset+14, m.m32())
+                    .put(offset+15, m.m33());
+        }
+
+        public static void put0(Matrix4f m, ByteBuffer dest) {
+            dest.putFloat(0,  m.m00())
+                    .putFloat(4,  m.m01())
+                    .putFloat(8,  m.m02())
+                    .putFloat(12, m.m03())
+                    .putFloat(16, m.m10())
+                    .putFloat(20, m.m11())
+                    .putFloat(24, m.m12())
+                    .putFloat(28, m.m13())
+                    .putFloat(32, m.m20())
+                    .putFloat(36, m.m21())
+                    .putFloat(40, m.m22())
+                    .putFloat(44, m.m23())
+                    .putFloat(48, m.m30())
+                    .putFloat(52, m.m31())
+                    .putFloat(56, m.m32())
+                    .putFloat(60, m.m33());
+        }
+
+        public static void putN(Matrix4f m, int offset, ByteBuffer dest) {
+            dest.putFloat(offset,    m.m00())
+                    .putFloat(offset+4,  m.m01())
+                    .putFloat(offset+8,  m.m02())
+                    .putFloat(offset+12, m.m03())
+                    .putFloat(offset+16, m.m10())
+                    .putFloat(offset+20, m.m11())
+                    .putFloat(offset+24, m.m12())
+                    .putFloat(offset+28, m.m13())
+                    .putFloat(offset+32, m.m20())
+                    .putFloat(offset+36, m.m21())
+                    .putFloat(offset+40, m.m22())
+                    .putFloat(offset+44, m.m23())
+                    .putFloat(offset+48, m.m30())
+                    .putFloat(offset+52, m.m31())
+                    .putFloat(offset+56, m.m32())
+                    .putFloat(offset+60, m.m33());
+        }
+
+        public static void put0(Matrix4x3f m, FloatBuffer dest) {
+            dest.put(0,  m.m00())
+                    .put(1,  m.m01())
+                    .put(2,  m.m02())
+                    .put(3,  m.m10())
+                    .put(4,  m.m11())
+                    .put(5,  m.m12())
+                    .put(6,  m.m20())
+                    .put(7,  m.m21())
+                    .put(8,  m.m22())
+                    .put(9,  m.m30())
+                    .put(10, m.m31())
+                    .put(11, m.m32());
+        }
+
+        public static void putN(Matrix4x3f m, int offset, FloatBuffer dest) {
+            dest.put(offset,    m.m00())
+                    .put(offset+1,  m.m01())
+                    .put(offset+2,  m.m02())
+                    .put(offset+3,  m.m10())
+                    .put(offset+4,  m.m11())
+                    .put(offset+5,  m.m12())
+                    .put(offset+6,  m.m20())
+                    .put(offset+7,  m.m21())
+                    .put(offset+8,  m.m22())
+                    .put(offset+9,  m.m30())
+                    .put(offset+10, m.m31())
+                    .put(offset+11, m.m32());
+        }
+
+        public static void put0(Matrix4x3f m, ByteBuffer dest) {
+            dest.putFloat(0,  m.m00())
+                    .putFloat(4,  m.m01())
+                    .putFloat(8,  m.m02())
+                    .putFloat(12, m.m10())
+                    .putFloat(16, m.m11())
+                    .putFloat(20, m.m12())
+                    .putFloat(24, m.m20())
+                    .putFloat(28, m.m21())
+                    .putFloat(32, m.m22())
+                    .putFloat(36, m.m30())
+                    .putFloat(40, m.m31())
+                    .putFloat(44, m.m32());
+        }
+
+        public static void putN(Matrix4x3f m, int offset, ByteBuffer dest) {
+            dest.putFloat(offset,    m.m00())
+                    .putFloat(offset+4,  m.m01())
+                    .putFloat(offset+8,  m.m02())
+                    .putFloat(offset+12, m.m10())
+                    .putFloat(offset+16, m.m11())
+                    .putFloat(offset+20, m.m12())
+                    .putFloat(offset+24, m.m20())
+                    .putFloat(offset+28, m.m21())
+                    .putFloat(offset+32, m.m22())
+                    .putFloat(offset+36, m.m30())
+                    .putFloat(offset+40, m.m31())
+                    .putFloat(offset+44, m.m32());
+        }
+
+        public static void put4x3_0(Matrix4f m, FloatBuffer dest) {
+            dest.put(0,  m.m00())
+                    .put(1,  m.m01())
+                    .put(2,  m.m02())
+                    .put(3,  m.m10())
+                    .put(4,  m.m11())
+                    .put(5,  m.m12())
+                    .put(6,  m.m20())
+                    .put(7,  m.m21())
+                    .put(8,  m.m22())
+                    .put(9,  m.m30())
+                    .put(10, m.m31())
+                    .put(11, m.m32());
+        }
+
+        public static void put4x3_N(Matrix4f m, int offset, FloatBuffer dest) {
+            dest.put(offset,    m.m00())
+                    .put(offset+1,  m.m01())
+                    .put(offset+2,  m.m02())
+                    .put(offset+3,  m.m10())
+                    .put(offset+4,  m.m11())
+                    .put(offset+5,  m.m12())
+                    .put(offset+6,  m.m20())
+                    .put(offset+7,  m.m21())
+                    .put(offset+8,  m.m22())
+                    .put(offset+9,  m.m30())
+                    .put(offset+10, m.m31())
+                    .put(offset+11, m.m32());
+        }
+
+        public static void put4x3_0(Matrix4f m, ByteBuffer dest) {
+            dest.putFloat(0,  m.m00())
+                    .putFloat(4,  m.m01())
+                    .putFloat(8,  m.m02())
+                    .putFloat(12, m.m10())
+                    .putFloat(16, m.m11())
+                    .putFloat(20, m.m12())
+                    .putFloat(24, m.m20())
+                    .putFloat(28, m.m21())
+                    .putFloat(32, m.m22())
+                    .putFloat(36, m.m30())
+                    .putFloat(40, m.m31())
+                    .putFloat(44, m.m32());
+        }
+
+        private static void put4x3_N(Matrix4f m, int offset, ByteBuffer dest) {
+            dest.putFloat(offset,    m.m00())
+                    .putFloat(offset+4,  m.m01())
+                    .putFloat(offset+8,  m.m02())
+                    .putFloat(offset+12, m.m10())
+                    .putFloat(offset+16, m.m11())
+                    .putFloat(offset+20, m.m12())
+                    .putFloat(offset+24, m.m20())
+                    .putFloat(offset+28, m.m21())
+                    .putFloat(offset+32, m.m22())
+                    .putFloat(offset+36, m.m30())
+                    .putFloat(offset+40, m.m31())
+                    .putFloat(offset+44, m.m32());
+        }
+
+        public static void put3x4_0(Matrix4f m, FloatBuffer dest) {
+            dest.put(0,  m.m00())
+                    .put(1,  m.m01())
+                    .put(2,  m.m02())
+                    .put(3,  m.m03())
+                    .put(4,  m.m10())
+                    .put(5,  m.m11())
+                    .put(6,  m.m12())
+                    .put(7,  m.m13())
+                    .put(8,  m.m20())
+                    .put(9,  m.m21())
+                    .put(10, m.m22())
+                    .put(11, m.m23());
+        }
+
+        public static void put3x4_N(Matrix4f m, int offset, FloatBuffer dest) {
+            dest.put(offset,    m.m00())
+                    .put(offset+1,  m.m01())
+                    .put(offset+2,  m.m02())
+                    .put(offset+3,  m.m03())
+                    .put(offset+4,  m.m10())
+                    .put(offset+5,  m.m11())
+                    .put(offset+6,  m.m12())
+                    .put(offset+7,  m.m13())
+                    .put(offset+8,  m.m20())
+                    .put(offset+9,  m.m21())
+                    .put(offset+10, m.m22())
+                    .put(offset+11, m.m23());
+        }
+
+        public static void put3x4_0(Matrix4f m, ByteBuffer dest) {
+            dest.putFloat(0,  m.m00())
+                    .putFloat(4,  m.m01())
+                    .putFloat(8,  m.m02())
+                    .putFloat(12, m.m03())
+                    .putFloat(16, m.m10())
+                    .putFloat(20, m.m11())
+                    .putFloat(24, m.m12())
+                    .putFloat(28, m.m13())
+                    .putFloat(32, m.m20())
+                    .putFloat(36, m.m21())
+                    .putFloat(40, m.m22())
+                    .putFloat(44, m.m23());
+        }
+
+        private static void put3x4_N(Matrix4f m, int offset, ByteBuffer dest) {
+            dest.putFloat(offset,    m.m00())
+                    .putFloat(offset+4,  m.m01())
+                    .putFloat(offset+8,  m.m02())
+                    .putFloat(offset+12, m.m03())
+                    .putFloat(offset+16, m.m10())
+                    .putFloat(offset+20, m.m11())
+                    .putFloat(offset+24, m.m12())
+                    .putFloat(offset+28, m.m13())
+                    .putFloat(offset+32, m.m20())
+                    .putFloat(offset+36, m.m21())
+                    .putFloat(offset+40, m.m22())
+                    .putFloat(offset+44, m.m23());
+        }
+
+        public static void put3x4_0(Matrix4x3f m, FloatBuffer dest) {
+            dest.put(0,  m.m00())
+                    .put(1,  m.m01())
+                    .put(2,  m.m02())
+                    .put(3,  0.0f)
+                    .put(4,  m.m10())
+                    .put(5,  m.m11())
+                    .put(6,  m.m12())
+                    .put(7,  0.0f)
+                    .put(8,  m.m20())
+                    .put(9,  m.m21())
+                    .put(10, m.m22())
+                    .put(11, 0.0f);
+        }
+
+        public static void put3x4_N(Matrix4x3f m, int offset, FloatBuffer dest) {
+            dest.put(offset,    m.m00())
+                    .put(offset+1,  m.m01())
+                    .put(offset+2,  m.m02())
+                    .put(offset+3,  0.0f)
+                    .put(offset+4,  m.m10())
+                    .put(offset+5,  m.m11())
+                    .put(offset+6,  m.m12())
+                    .put(offset+7,  0.0f)
+                    .put(offset+8,  m.m20())
+                    .put(offset+9,  m.m21())
+                    .put(offset+10, m.m22())
+                    .put(offset+11, 0.0f);
+        }
+
+        public static void put3x4_0(Matrix4x3f m, ByteBuffer dest) {
+            dest.putFloat(0,  m.m00())
+                    .putFloat(4,  m.m01())
+                    .putFloat(8,  m.m02())
+                    .putFloat(12, 0.0f)
+                    .putFloat(16, m.m10())
+                    .putFloat(20, m.m11())
+                    .putFloat(24, m.m12())
+                    .putFloat(28, 0.0f)
+                    .putFloat(32, m.m20())
+                    .putFloat(36, m.m21())
+                    .putFloat(40, m.m22())
+                    .putFloat(44, 0.0f);
+        }
+
+        private static void put3x4_N(Matrix4x3f m, int offset, ByteBuffer dest) {
+            dest.putFloat(offset,    m.m00())
+                    .putFloat(offset+4,  m.m01())
+                    .putFloat(offset+8,  m.m02())
+                    .putFloat(offset+12, 0.0f)
+                    .putFloat(offset+16, m.m10())
+                    .putFloat(offset+20, m.m11())
+                    .putFloat(offset+24, m.m12())
+                    .putFloat(offset+28, 0.0f)
+                    .putFloat(offset+32, m.m20())
+                    .putFloat(offset+36, m.m21())
+                    .putFloat(offset+40, m.m22())
+                    .putFloat(offset+44, 0.0f);
+        }
+
+        public static void put3x4_0(Matrix3f m, FloatBuffer dest) {
+            dest.put(0,  m.m00())
+                    .put(1,  m.m01())
+                    .put(2,  m.m02())
+                    .put(3,  0.0f)
+                    .put(4,  m.m10())
+                    .put(5,  m.m11())
+                    .put(6,  m.m12())
+                    .put(7,  0.0f)
+                    .put(8,  m.m20())
+                    .put(9,  m.m21())
+                    .put(10, m.m22())
+                    .put(11, 0.0f);
+        }
+
+        public static void put3x4_N(Matrix3f m, int offset, FloatBuffer dest) {
+            dest.put(offset,    m.m00())
+                    .put(offset+1,  m.m01())
+                    .put(offset+2,  m.m02())
+                    .put(offset+3,  0.0f)
+                    .put(offset+4,  m.m10())
+                    .put(offset+5,  m.m11())
+                    .put(offset+6,  m.m12())
+                    .put(offset+7,  0.0f)
+                    .put(offset+8,  m.m20())
+                    .put(offset+9,  m.m21())
+                    .put(offset+10, m.m22())
+                    .put(offset+11, 0.0f);
+        }
+
+        public static void put3x4_0(Matrix3f m, ByteBuffer dest) {
+            dest.putFloat(0,  m.m00())
+                    .putFloat(4,  m.m01())
+                    .putFloat(8,  m.m02())
+                    .putFloat(12, 0.0f)
+                    .putFloat(16, m.m10())
+                    .putFloat(20, m.m11())
+                    .putFloat(24, m.m12())
+                    .putFloat(28, 0.0f)
+                    .putFloat(32, m.m20())
+                    .putFloat(36, m.m21())
+                    .putFloat(40, m.m22())
+                    .putFloat(44, 0.0f);
+        }
+
+        private static void put3x4_N(Matrix3f m, int offset, ByteBuffer dest) {
+            dest.putFloat(offset,    m.m00())
+                    .putFloat(offset+4,  m.m01())
+                    .putFloat(offset+8,  m.m02())
+                    .putFloat(offset+12, 0.0f)
+                    .putFloat(offset+16, m.m10())
+                    .putFloat(offset+20, m.m11())
+                    .putFloat(offset+24, m.m12())
+                    .putFloat(offset+28, 0.0f)
+                    .putFloat(offset+32, m.m20())
+                    .putFloat(offset+36, m.m21())
+                    .putFloat(offset+40, m.m22())
+                    .putFloat(offset+44, 0.0f);
+        }
     }
 
     public void put(Matrix4f m, int offset, FloatBuffer dest) {
+        if (U1 || U2) {
+
+        }
         if (offset == 0)
-            put0(m, dest);
+            NIO.put0(m, dest);
         else
-            putN(m, offset, dest);
-    }
-
-    public void put0(Matrix4f m, ByteBuffer dest) {
-        dest.putFloat(0,  m.m00())
-                .putFloat(4,  m.m01())
-                .putFloat(8,  m.m02())
-                .putFloat(12, m.m03())
-                .putFloat(16, m.m10())
-                .putFloat(20, m.m11())
-                .putFloat(24, m.m12())
-                .putFloat(28, m.m13())
-                .putFloat(32, m.m20())
-                .putFloat(36, m.m21())
-                .putFloat(40, m.m22())
-                .putFloat(44, m.m23())
-                .putFloat(48, m.m30())
-                .putFloat(52, m.m31())
-                .putFloat(56, m.m32())
-                .putFloat(60, m.m33());
-    }
-
-    private void putN(Matrix4f m, int offset, ByteBuffer dest) {
-        dest.putFloat(offset,    m.m00())
-                .putFloat(offset+4,  m.m01())
-                .putFloat(offset+8,  m.m02())
-                .putFloat(offset+12, m.m03())
-                .putFloat(offset+16, m.m10())
-                .putFloat(offset+20, m.m11())
-                .putFloat(offset+24, m.m12())
-                .putFloat(offset+28, m.m13())
-                .putFloat(offset+32, m.m20())
-                .putFloat(offset+36, m.m21())
-                .putFloat(offset+40, m.m22())
-                .putFloat(offset+44, m.m23())
-                .putFloat(offset+48, m.m30())
-                .putFloat(offset+52, m.m31())
-                .putFloat(offset+56, m.m32())
-                .putFloat(offset+60, m.m33());
+            NIO.putN(m, offset, dest);
     }
 
     public void put(Matrix4f m, int offset, ByteBuffer dest) {
         if (offset == 0)
-            put0(m, dest);
+            NIO.put0(m, dest);
         else
-            putN(m, offset, dest);
-    }
-
-    public void put0(Matrix4x3f m, FloatBuffer dest) {
-        dest.put(0,  m.m00())
-                .put(1,  m.m01())
-                .put(2,  m.m02())
-                .put(3,  m.m10())
-                .put(4,  m.m11())
-                .put(5,  m.m12())
-                .put(6,  m.m20())
-                .put(7,  m.m21())
-                .put(8,  m.m22())
-                .put(9,  m.m30())
-                .put(10, m.m31())
-                .put(11, m.m32());
-    }
-
-    public void putN(Matrix4x3f m, int offset, FloatBuffer dest) {
-        dest.put(offset,    m.m00())
-                .put(offset+1,  m.m01())
-                .put(offset+2,  m.m02())
-                .put(offset+3,  m.m10())
-                .put(offset+4,  m.m11())
-                .put(offset+5,  m.m12())
-                .put(offset+6,  m.m20())
-                .put(offset+7,  m.m21())
-                .put(offset+8,  m.m22())
-                .put(offset+9,  m.m30())
-                .put(offset+10, m.m31())
-                .put(offset+11, m.m32());
+            NIO.putN(m, offset, dest);
     }
 
     public void put(Matrix4x3f m, int offset, FloatBuffer dest) {
         if (offset == 0)
-            put0(m, dest);
+            NIO.put0(m, dest);
         else
-            putN(m, offset, dest);
-    }
-
-    public void put0(Matrix4x3f m, ByteBuffer dest) {
-        dest.putFloat(0,  m.m00())
-                .putFloat(4,  m.m01())
-                .putFloat(8,  m.m02())
-                .putFloat(12, m.m10())
-                .putFloat(16, m.m11())
-                .putFloat(20, m.m12())
-                .putFloat(24, m.m20())
-                .putFloat(28, m.m21())
-                .putFloat(32, m.m22())
-                .putFloat(36, m.m30())
-                .putFloat(40, m.m31())
-                .putFloat(44, m.m32());
-    }
-
-    public void putN(Matrix4x3f m, int offset, ByteBuffer dest) {
-        dest.putFloat(offset,    m.m00())
-                .putFloat(offset+4,  m.m01())
-                .putFloat(offset+8,  m.m02())
-                .putFloat(offset+12, m.m10())
-                .putFloat(offset+16, m.m11())
-                .putFloat(offset+20, m.m12())
-                .putFloat(offset+24, m.m20())
-                .putFloat(offset+28, m.m21())
-                .putFloat(offset+32, m.m22())
-                .putFloat(offset+36, m.m30())
-                .putFloat(offset+40, m.m31())
-                .putFloat(offset+44, m.m32());
+            NIO.putN(m, offset, dest);
     }
 
     public void put(Matrix4x3f m, int offset, ByteBuffer dest) {
         if (offset == 0)
-            put0(m, dest);
+            NIO.put0(m, dest);
         else
-            putN(m, offset, dest);
+            NIO.putN(m, offset, dest);
     }
 
     public void put4x4(Matrix4x3f m, int offset, FloatBuffer dest) {
@@ -437,303 +684,63 @@ abstract class MemUtil {
                 .putDouble(offset+64, 1.0);
     }
 
-    public void put4x3_0(Matrix4f m, FloatBuffer dest) {
-        dest.put(0,  m.m00())
-                .put(1,  m.m01())
-                .put(2,  m.m02())
-                .put(3,  m.m10())
-                .put(4,  m.m11())
-                .put(5,  m.m12())
-                .put(6,  m.m20())
-                .put(7,  m.m21())
-                .put(8,  m.m22())
-                .put(9,  m.m30())
-                .put(10, m.m31())
-                .put(11, m.m32());
-    }
-
-    public void put4x3_N(Matrix4f m, int offset, FloatBuffer dest) {
-        dest.put(offset,    m.m00())
-                .put(offset+1,  m.m01())
-                .put(offset+2,  m.m02())
-                .put(offset+3,  m.m10())
-                .put(offset+4,  m.m11())
-                .put(offset+5,  m.m12())
-                .put(offset+6,  m.m20())
-                .put(offset+7,  m.m21())
-                .put(offset+8,  m.m22())
-                .put(offset+9,  m.m30())
-                .put(offset+10, m.m31())
-                .put(offset+11, m.m32());
-    }
-
     public void put4x3(Matrix4f m, int offset, FloatBuffer dest) {
         if (offset == 0)
-            put4x3_0(m, dest);
+            NIO.put4x3_0(m, dest);
         else
-            put4x3_N(m, offset, dest);
-    }
-
-    public void put4x3_0(Matrix4f m, ByteBuffer dest) {
-        dest.putFloat(0,  m.m00())
-                .putFloat(4,  m.m01())
-                .putFloat(8,  m.m02())
-                .putFloat(12, m.m10())
-                .putFloat(16, m.m11())
-                .putFloat(20, m.m12())
-                .putFloat(24, m.m20())
-                .putFloat(28, m.m21())
-                .putFloat(32, m.m22())
-                .putFloat(36, m.m30())
-                .putFloat(40, m.m31())
-                .putFloat(44, m.m32());
-    }
-
-    private void put4x3_N(Matrix4f m, int offset, ByteBuffer dest) {
-        dest.putFloat(offset,    m.m00())
-                .putFloat(offset+4,  m.m01())
-                .putFloat(offset+8,  m.m02())
-                .putFloat(offset+12, m.m10())
-                .putFloat(offset+16, m.m11())
-                .putFloat(offset+20, m.m12())
-                .putFloat(offset+24, m.m20())
-                .putFloat(offset+28, m.m21())
-                .putFloat(offset+32, m.m22())
-                .putFloat(offset+36, m.m30())
-                .putFloat(offset+40, m.m31())
-                .putFloat(offset+44, m.m32());
+            NIO.put4x3_N(m, offset, dest);
     }
 
     public void put4x3(Matrix4f m, int offset, ByteBuffer dest) {
         if (offset == 0)
-            put4x3_0(m, dest);
+            NIO.put4x3_0(m, dest);
         else
-            put4x3_N(m, offset, dest);
-    }
-
-    public void put3x4_0(Matrix4f m, FloatBuffer dest) {
-        dest.put(0,  m.m00())
-                .put(1,  m.m01())
-                .put(2,  m.m02())
-                .put(3,  m.m03())
-                .put(4,  m.m10())
-                .put(5,  m.m11())
-                .put(6,  m.m12())
-                .put(7,  m.m13())
-                .put(8,  m.m20())
-                .put(9,  m.m21())
-                .put(10, m.m22())
-                .put(11, m.m23());
-    }
-
-    public void put3x4_N(Matrix4f m, int offset, FloatBuffer dest) {
-        dest.put(offset,    m.m00())
-                .put(offset+1,  m.m01())
-                .put(offset+2,  m.m02())
-                .put(offset+3,  m.m03())
-                .put(offset+4,  m.m10())
-                .put(offset+5,  m.m11())
-                .put(offset+6,  m.m12())
-                .put(offset+7,  m.m13())
-                .put(offset+8,  m.m20())
-                .put(offset+9,  m.m21())
-                .put(offset+10, m.m22())
-                .put(offset+11, m.m23());
+            NIO.put4x3_N(m, offset, dest);
     }
 
     public void put3x4(Matrix4f m, int offset, FloatBuffer dest) {
         if (offset == 0)
-            put3x4_0(m, dest);
+            NIO.put3x4_0(m, dest);
         else
-            put3x4_N(m, offset, dest);
-    }
-
-    public void put3x4_0(Matrix4f m, ByteBuffer dest) {
-        dest.putFloat(0,  m.m00())
-                .putFloat(4,  m.m01())
-                .putFloat(8,  m.m02())
-                .putFloat(12, m.m03())
-                .putFloat(16, m.m10())
-                .putFloat(20, m.m11())
-                .putFloat(24, m.m12())
-                .putFloat(28, m.m13())
-                .putFloat(32, m.m20())
-                .putFloat(36, m.m21())
-                .putFloat(40, m.m22())
-                .putFloat(44, m.m23());
-    }
-
-    private void put3x4_N(Matrix4f m, int offset, ByteBuffer dest) {
-        dest.putFloat(offset,    m.m00())
-                .putFloat(offset+4,  m.m01())
-                .putFloat(offset+8,  m.m02())
-                .putFloat(offset+12, m.m03())
-                .putFloat(offset+16, m.m10())
-                .putFloat(offset+20, m.m11())
-                .putFloat(offset+24, m.m12())
-                .putFloat(offset+28, m.m13())
-                .putFloat(offset+32, m.m20())
-                .putFloat(offset+36, m.m21())
-                .putFloat(offset+40, m.m22())
-                .putFloat(offset+44, m.m23());
+            NIO.put3x4_N(m, offset, dest);
     }
 
     public void put3x4(Matrix4f m, int offset, ByteBuffer dest) {
         if (offset == 0)
-            put3x4_0(m, dest);
+            NIO.put3x4_0(m, dest);
         else
-            put3x4_N(m, offset, dest);
-    }
-
-    public void put3x4_0(Matrix4x3f m, FloatBuffer dest) {
-        dest.put(0,  m.m00())
-                .put(1,  m.m01())
-                .put(2,  m.m02())
-                .put(3,  0.0f)
-                .put(4,  m.m10())
-                .put(5,  m.m11())
-                .put(6,  m.m12())
-                .put(7,  0.0f)
-                .put(8,  m.m20())
-                .put(9,  m.m21())
-                .put(10, m.m22())
-                .put(11, 0.0f);
-    }
-
-    public void put3x4_N(Matrix4x3f m, int offset, FloatBuffer dest) {
-        dest.put(offset,    m.m00())
-                .put(offset+1,  m.m01())
-                .put(offset+2,  m.m02())
-                .put(offset+3,  0.0f)
-                .put(offset+4,  m.m10())
-                .put(offset+5,  m.m11())
-                .put(offset+6,  m.m12())
-                .put(offset+7,  0.0f)
-                .put(offset+8,  m.m20())
-                .put(offset+9,  m.m21())
-                .put(offset+10, m.m22())
-                .put(offset+11, 0.0f);
+            NIO.put3x4_N(m, offset, dest);
     }
 
     public void put3x4(Matrix4x3f m, int offset, FloatBuffer dest) {
         if (offset == 0)
-            put3x4_0(m, dest);
+            NIO.put3x4_0(m, dest);
         else
-            put3x4_N(m, offset, dest);
-    }
-
-    public void put3x4_0(Matrix4x3f m, ByteBuffer dest) {
-        dest.putFloat(0,  m.m00())
-                .putFloat(4,  m.m01())
-                .putFloat(8,  m.m02())
-                .putFloat(12, 0.0f)
-                .putFloat(16, m.m10())
-                .putFloat(20, m.m11())
-                .putFloat(24, m.m12())
-                .putFloat(28, 0.0f)
-                .putFloat(32, m.m20())
-                .putFloat(36, m.m21())
-                .putFloat(40, m.m22())
-                .putFloat(44, 0.0f);
-    }
-
-    private void put3x4_N(Matrix4x3f m, int offset, ByteBuffer dest) {
-        dest.putFloat(offset,    m.m00())
-                .putFloat(offset+4,  m.m01())
-                .putFloat(offset+8,  m.m02())
-                .putFloat(offset+12, 0.0f)
-                .putFloat(offset+16, m.m10())
-                .putFloat(offset+20, m.m11())
-                .putFloat(offset+24, m.m12())
-                .putFloat(offset+28, 0.0f)
-                .putFloat(offset+32, m.m20())
-                .putFloat(offset+36, m.m21())
-                .putFloat(offset+40, m.m22())
-                .putFloat(offset+44, 0.0f);
+            NIO.put3x4_N(m, offset, dest);
     }
 
     public void put3x4(Matrix4x3f m, int offset, ByteBuffer dest) {
         if (offset == 0)
-            put3x4_0(m, dest);
+            NIO.put3x4_0(m, dest);
         else
-            put3x4_N(m, offset, dest);
-    }
-
-    public void put3x4_0(Matrix3f m, FloatBuffer dest) {
-        dest.put(0,  m.m00())
-                .put(1,  m.m01())
-                .put(2,  m.m02())
-                .put(3,  0.0f)
-                .put(4,  m.m10())
-                .put(5,  m.m11())
-                .put(6,  m.m12())
-                .put(7,  0.0f)
-                .put(8,  m.m20())
-                .put(9,  m.m21())
-                .put(10, m.m22())
-                .put(11, 0.0f);
-    }
-
-    public void put3x4_N(Matrix3f m, int offset, FloatBuffer dest) {
-        dest.put(offset,    m.m00())
-                .put(offset+1,  m.m01())
-                .put(offset+2,  m.m02())
-                .put(offset+3,  0.0f)
-                .put(offset+4,  m.m10())
-                .put(offset+5,  m.m11())
-                .put(offset+6,  m.m12())
-                .put(offset+7,  0.0f)
-                .put(offset+8,  m.m20())
-                .put(offset+9,  m.m21())
-                .put(offset+10, m.m22())
-                .put(offset+11, 0.0f);
+            NIO.put3x4_N(m, offset, dest);
     }
 
     public void put3x4(Matrix3f m, int offset, FloatBuffer dest) {
         if (offset == 0)
-            put3x4_0(m, dest);
+            NIO.put3x4_0(m, dest);
         else
-            put3x4_N(m, offset, dest);
-    }
-
-    public void put3x4_0(Matrix3f m, ByteBuffer dest) {
-        dest.putFloat(0,  m.m00())
-                .putFloat(4,  m.m01())
-                .putFloat(8,  m.m02())
-                .putFloat(12, 0.0f)
-                .putFloat(16, m.m10())
-                .putFloat(20, m.m11())
-                .putFloat(24, m.m12())
-                .putFloat(28, 0.0f)
-                .putFloat(32, m.m20())
-                .putFloat(36, m.m21())
-                .putFloat(40, m.m22())
-                .putFloat(44, 0.0f);
-    }
-
-    private void put3x4_N(Matrix3f m, int offset, ByteBuffer dest) {
-        dest.putFloat(offset,    m.m00())
-                .putFloat(offset+4,  m.m01())
-                .putFloat(offset+8,  m.m02())
-                .putFloat(offset+12, 0.0f)
-                .putFloat(offset+16, m.m10())
-                .putFloat(offset+20, m.m11())
-                .putFloat(offset+24, m.m12())
-                .putFloat(offset+28, 0.0f)
-                .putFloat(offset+32, m.m20())
-                .putFloat(offset+36, m.m21())
-                .putFloat(offset+40, m.m22())
-                .putFloat(offset+44, 0.0f);
+            NIO.put3x4_N(m, offset, dest);
     }
 
     public void put3x4(Matrix3f m, int offset, ByteBuffer dest) {
         if (offset == 0)
-            put3x4_0(m, dest);
+            NIO.put3x4_0(m, dest);
         else
-            put3x4_N(m, offset, dest);
+            NIO.put3x4_N(m, offset, dest);
     }
 
-    private void putTransposedN(Matrix4f m, int offset, FloatBuffer dest) {
+    private static void putTransposedN(Matrix4f m, int offset, FloatBuffer dest) {
         dest.put(offset,    m.m00())
                 .put(offset+1,  m.m10())
                 .put(offset+2,  m.m20())
@@ -752,7 +759,7 @@ abstract class MemUtil {
                 .put(offset+15, m.m33());
     }
 
-    private void putTransposed0(Matrix4f m, FloatBuffer dest) {
+    private static void putTransposed0(Matrix4f m, FloatBuffer dest) {
         dest.put(0,    m.m00())
                 .put(1,  m.m10())
                 .put(2,  m.m20())
@@ -2076,14 +2083,25 @@ abstract class MemUtil {
     }
 
     public void get(Matrix2d m, int offset, DoubleBuffer src) {
+        if (U1 || U2) {
+            if (Options.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4);
+            if (src.isDirect()) {
+                return;
+            }
+        }
         m._m00(src.get(offset))
-                ._m01(src.get(offset+1))
-                ._m10(src.get(offset+2))
-                ._m11(src.get(offset+3));
+                ._m01(src.get(offset + 1))
+                ._m10(src.get(offset + 2))
+                ._m11(src.get(offset + 3));
     }
 
-    public void get(Matrix2d m, int offset, ByteBuffer src) {
-        m._m00(src.getDouble(offset))
+    public static void get(Matrix2d m, int offset, ByteBuffer src) {
+        if (U2)
+            MemUtil$$U2.get(m, offset, src);
+        else if (U1)
+            MemUtil$$U1.get(m, offset, src);
+        else
+            m._m00(src.getDouble(offset))
                 ._m01(src.getDouble(offset+8))
                 ._m10(src.getDouble(offset+16))
                 ._m11(src.getDouble(offset+24));

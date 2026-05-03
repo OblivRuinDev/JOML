@@ -363,28 +363,13 @@ class JvmciCode {
     canUseJvmci = _canUseJvmci;
   }
   private static void checkMatrix4f() throws Throwable {
-    Field f;
-    sun.misc.Unsafe u = unsafeInstance();
-    for (int i = 0; i < 16; i++) {
-      int c = i >>> 2;
-      int r = i & 3;
-      f = Matrix4f.class.getDeclaredField("m" + c + r);
-      long offset = u.objectFieldOffset(f);
-      if (offset != 16 + (i << 2))
-        throw new AssertionError("invalid Matrix4f field offset");
-    }
+    if (MemUtil$$Field.Matrix4f_m00 != 16)
+      throw new AssertionError("invalid Matrix4f field offset");
   }
   private static void checkMatrix4d() throws Throwable {
-    Field f;
-    sun.misc.Unsafe u = unsafeInstance();
-    for (int i = 0; i < 16; i++) {
-      int c = i >>> 2;
-      int r = i & 3;
-      f = Matrix4d.class.getDeclaredField("m" + c + r);
-      long offset = u.objectFieldOffset(f);
-      if (offset != 16 + (i << 3))
-        throw new AssertionError("invalid Matrix4d field offset");
-    }
+    //same to MemUtil$$Field
+    if (MemUtil$$Field.Matrix4d_m00 != 16)
+      throw new AssertionError("invalid Matrix4d field offset");
   }
   private static void checkQuaternionf() throws Throwable {
     sun.misc.Unsafe u = unsafeInstance();

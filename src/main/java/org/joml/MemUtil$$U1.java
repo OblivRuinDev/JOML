@@ -1076,7 +1076,7 @@ class MemUtil$$U1 {
         u.putFloat(null, addr + 44, 0.0f);
     }
 
-    private static void throwNoDirectBufferException() {
+    static void throwNoDirectBufferException() {
         throw new IllegalArgumentException("Must use a direct buffer");
     }
 
@@ -1097,7 +1097,7 @@ class MemUtil$$U1 {
             MemUtil.putMatrix3f(q, offset, dest);
     }
 
-    private static void checkPut(int offset, boolean direct, int capacity, int i) {
+    static void checkPut(int offset, boolean direct, int capacity, int i) {
         if (!direct)
             throwNoDirectBufferException();
         if (capacity - offset < i)
@@ -2100,7 +2100,7 @@ class MemUtil$$U1 {
             MemUtil.getf(m, offset, src);
     }
 
-    private static void checkGet(int offset, boolean direct, int capacity, int i) {
+    static void checkGet(int offset, boolean direct, int capacity, int i) {
         if (!direct)
             throwNoDirectBufferException();
         if (capacity - offset < i)
@@ -2219,7 +2219,7 @@ class MemUtil$$U1 {
             MemUtil.get(m, offset, src);
     }
 
-    public void get(Matrix2d m, int offset, ByteBuffer src) {
+    public static void get(Matrix2d m, int offset, ByteBuffer src) {
         if (Options.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4 << 3);
         if (src.order() == ByteOrder.nativeOrder())
             get(m, UNSAFE.getLong(src, ADDRESS) + offset);

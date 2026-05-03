@@ -181,7 +181,7 @@ public class Matrix2d implements Externalizable, Cloneable, Matrix2dc {
      * @see #Matrix2d(int, ByteBuffer)
      */
     public Matrix2d(ByteBuffer buffer) {
-        MemUtil.INSTANCE.get(this, buffer.position(), buffer);
+        MemUtil.get(this, buffer.position(), buffer);
     }
 
     /**
@@ -198,7 +198,7 @@ public class Matrix2d implements Externalizable, Cloneable, Matrix2dc {
      *          the {@link ByteBuffer} to read the matrix values from
      */
     public Matrix2d(int index, ByteBuffer buffer) {
-        MemUtil.INSTANCE.get(this, index, buffer);
+        MemUtil.get(this, index, buffer);
     }
 //#endif
 
@@ -910,7 +910,7 @@ public class Matrix2d implements Externalizable, Cloneable, Matrix2dc {
      * @return this
      */
     public Matrix2d set(ByteBuffer buffer) {
-        MemUtil.INSTANCE.get(this, buffer.position(), buffer);
+        MemUtil.get(this, buffer.position(), buffer);
         return this;
     }
 
@@ -948,7 +948,7 @@ public class Matrix2d implements Externalizable, Cloneable, Matrix2dc {
      * @return this
      */
     public Matrix2d set(int index, ByteBuffer buffer) {
-        MemUtil.INSTANCE.get(this, index, buffer);
+        MemUtil.get(this, index, buffer);
         return this;
     }
 //#endif
