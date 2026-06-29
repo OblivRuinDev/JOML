@@ -28,6 +28,8 @@ import java.lang.reflect.Field;
 import java.nio.*;
 //#endif
 
+import static org.joml.UnsafeField.*;
+
 /**
  * Helper class to do efficient memory operations on all JOML objects, NIO buffers and primitive arrays.
  * This class is used internally throughout JOML, is undocumented and is subject to change.
@@ -3929,257 +3931,36 @@ abstract class MemUtil {
 //#ifdef __HAS_NIO__
         public static final long ADDRESS;
 //#endif
-        public static final long Matrix2f_m00;
-        public static final long Matrix3f_m00;
-        public static final long Matrix3d_m00;
-        public static final long Matrix4f_m00;
-        public static final long Matrix4d_m00;
-        public static final long Matrix4x3f_m00;
-        public static final long Matrix3x2f_m00;
-        public static final long Vector4f_x;
-        public static final long Vector4i_x;
-        public static final long Vector3f_x;
-        public static final long Vector3i_x;
-        public static final long Vector2f_x;
-        public static final long Vector2i_x;
         public static final long floatArrayOffset;
 
         static {
             UNSAFE = getUnsafeInstance();
-            try {
+            if (
 //#ifdef __HAS_NIO__
-                ADDRESS = findBufferAddress();
+                    (ADDRESS = bufferAddress) == -1L &&
 //#endif
-                Matrix4f_m00 = checkMatrix4f();
-                Matrix4d_m00 = checkMatrix4d();
-                Matrix4x3f_m00 = checkMatrix4x3f();
-                Matrix3f_m00 = checkMatrix3f();
-                Matrix3d_m00 = checkMatrix3d();
-                Matrix3x2f_m00 = checkMatrix3x2f();
-                Matrix2f_m00 = checkMatrix2f();
-                Vector4f_x = checkVector4f();
-                Vector4i_x = checkVector4i();
-                Vector3f_x = checkVector3f();
-                Vector3i_x = checkVector3i();
-                Vector2f_x = checkVector2f();
-                Vector2i_x = checkVector2i();
+                    Matrix2f_m00 == -1L &&
+                    Matrix3f_m00 == -1L &&
+                    Matrix3d_m00 == -1L &&
+                    Matrix4f_m00 == -1L &&
+                    Matrix4d_m00 == -1L &&
+                    Matrix4x3f_m00 == -1L &&
+                    Matrix3x2f_m00 == -1L &&
+                    Vector4f_x == -1L &&
+                    Vector4i_x == -1L &&
+                    Vector3f_x == -1L &&
+                    Vector3i_x == -1L &&
+                    Vector2f_x == -1L) {
+                throw new UnsupportedOperationException();
+            }
+            try {
                 floatArrayOffset = UNSAFE.arrayBaseOffset(float[].class);
                 // Check if we can use object field offset/address put/get methods
                 sun.misc.Unsafe.class.getDeclaredMethod("getLong", new Class[] {Object.class, long.class});
                 sun.misc.Unsafe.class.getDeclaredMethod("putLong", new Class[] {Object.class, long.class, long.class});
-            } catch (NoSuchFieldException e) {
-                throw new UnsupportedOperationException(e);
             } catch (NoSuchMethodException e) {
                 throw new UnsupportedOperationException(e);
             }
-        }
-
-//#ifdef __HAS_NIO__
-        private static long findBufferAddress() {
-            try {
-                return UNSAFE.objectFieldOffset(getDeclaredField(Buffer.class, "address")); //$NON-NLS-1$
-            } catch (Exception e) {
-                throw new UnsupportedOperationException(e);
-            }
-        }
-//#endif
-
-        private static long checkMatrix4f() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix4f.class.getDeclaredField("m00");
-            long Matrix4f_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 16; i++) {
-                int c = i >>> 2;
-                int r = i & 3;
-                f = Matrix4f.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix4f_m00 + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Matrix4f element offset");
-            }
-            return Matrix4f_m00;
-        }
-
-        private static long checkMatrix4d() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix4d.class.getDeclaredField("m00");
-            long Matrix4d_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 16; i++) {
-                int c = i >>> 2;
-                int r = i & 3;
-                f = Matrix4d.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix4d_m00 + (i << 3))
-                    throw new UnsupportedOperationException("Unexpected Matrix4d element offset");
-            }
-            return Matrix4d_m00;
-        }
-
-        private static long checkMatrix4x3f() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix4x3f.class.getDeclaredField("m00");
-            long Matrix4x3f_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 12; i++) {
-                int c = i / 3;
-                int r = i % 3;
-                f = Matrix4x3f.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix4x3f_m00 + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Matrix4x3f element offset");
-            }
-            return Matrix4x3f_m00;
-        }
-
-        private static long checkMatrix3f() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix3f.class.getDeclaredField("m00");
-            long Matrix3f_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 9; i++) {
-                int c = i / 3;
-                int r = i % 3;
-                f = Matrix3f.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix3f_m00 + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Matrix3f element offset");
-            }
-            return Matrix3f_m00;
-        }
-
-        private static long checkMatrix3d() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix3d.class.getDeclaredField("m00");
-            long Matrix3d_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 9; i++) {
-                int c = i / 3;
-                int r = i % 3;
-                f = Matrix3d.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix3d_m00 + (i << 3))
-                    throw new UnsupportedOperationException("Unexpected Matrix3d element offset");
-            }
-            return Matrix3d_m00;
-        }
-
-        private static long checkMatrix3x2f() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix3x2f.class.getDeclaredField("m00");
-            long Matrix3x2f_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 6; i++) {
-                int c = i / 2;
-                int r = i % 2;
-                f = Matrix3x2f.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix3x2f_m00 + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Matrix3x2f element offset");
-            }
-            return Matrix3x2f_m00;
-        }
-
-        private static long checkMatrix2f() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix2f.class.getDeclaredField("m00");
-            long Matrix2f_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 4; i++) {
-                int c = i / 2;
-                int r = i % 2;
-                f = Matrix2f.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix2f_m00 + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Matrix2f element offset");
-            }
-            return Matrix2f_m00;
-        }
-
-        private static long checkVector4f() throws NoSuchFieldException, SecurityException {
-            Field f = Vector4f.class.getDeclaredField("x");
-            long Vector4f_x = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            String[] names = {"y", "z", "w"};
-            for (int i = 1; i < 4; i++) {
-                f = Vector4f.class.getDeclaredField(names[i-1]);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Vector4f_x + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Vector4f element offset");
-            }
-            return Vector4f_x;
-        }
-
-        private static long checkVector4i() throws NoSuchFieldException, SecurityException {
-            Field f = Vector4i.class.getDeclaredField("x");
-            long Vector4i_x = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            String[] names = {"y", "z", "w"};
-            for (int i = 1; i < 4; i++) {
-                f = Vector4i.class.getDeclaredField(names[i-1]);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Vector4i_x + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Vector4i element offset");
-            }
-            return Vector4i_x;
-        }
-
-        private static long checkVector3f() throws NoSuchFieldException, SecurityException {
-            Field f = Vector3f.class.getDeclaredField("x");
-            long Vector3f_x = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            String[] names = {"y", "z"};
-            for (int i = 1; i < 3; i++) {
-                f = Vector3f.class.getDeclaredField(names[i-1]);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Vector3f_x + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Vector3f element offset");
-            }
-            return Vector3f_x;
-        }
-
-        private static long checkVector3i() throws NoSuchFieldException, SecurityException {
-            Field f = Vector3i.class.getDeclaredField("x");
-            long Vector3i_x = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            String[] names = {"y", "z"};
-            for (int i = 1; i < 3; i++) {
-                f = Vector3i.class.getDeclaredField(names[i-1]);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Vector3i_x + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Vector3i element offset");
-            }
-            return Vector3i_x;
-        }
-
-        private static long checkVector2f() throws NoSuchFieldException, SecurityException {
-            Field f = Vector2f.class.getDeclaredField("x");
-            long Vector2f_x = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            f = Vector2f.class.getDeclaredField("y");
-            long offset = UNSAFE.objectFieldOffset(f);
-            if (offset != Vector2f_x + (1 << 2))
-                throw new UnsupportedOperationException("Unexpected Vector2f element offset");
-            return Vector2f_x;
-        }
-
-        private static long checkVector2i() throws NoSuchFieldException, SecurityException {
-            Field f = Vector2i.class.getDeclaredField("x");
-            long Vector2i_x = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            f = Vector2i.class.getDeclaredField("y");
-            long offset = UNSAFE.objectFieldOffset(f);
-            if (offset != Vector2i_x + (1 << 2))
-                throw new UnsupportedOperationException("Unexpected Vector2i element offset");
-            return Vector2i_x;
-        }
-
-        private static java.lang.reflect.Field getDeclaredField(Class root, String fieldName) throws NoSuchFieldException {
-            Class type = root;
-            do {
-                try {
-                    java.lang.reflect.Field field = type.getDeclaredField(fieldName);
-                    return field;
-                } catch (NoSuchFieldException e) {
-                    type = type.getSuperclass();
-                } catch (SecurityException e) {
-                    type = type.getSuperclass();
-                }
-            } while (type != null);
-            throw new NoSuchFieldException(fieldName + " does not exist in " + root.getName() + " or any of its superclasses."); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         public static sun.misc.Unsafe getUnsafeInstance() throws SecurityException {
@@ -6537,250 +6318,27 @@ abstract class MemUtil {
         //#ifdef __HAS_NIO__
         public static final long ADDRESS;
         //#endif
-        public static final long Matrix2f_m00;
-        public static final long Matrix3f_m00;
-        public static final long Matrix3d_m00;
-        public static final long Matrix4f_m00;
-        public static final long Matrix4d_m00;
-        public static final long Matrix4x3f_m00;
-        public static final long Matrix3x2f_m00;
-        public static final long Vector4f_x;
-        public static final long Vector4i_x;
-        public static final long Vector3f_x;
-        public static final long Vector3i_x;
-        public static final long Vector2f_x;
-        public static final long Vector2i_x;
 
         static {
             UNSAFE = jdk.internal.misc.Unsafe.getUnsafe();
-            try {
+            if (
 //#ifdef __HAS_NIO__
-                ADDRESS = findBufferAddress();
+                    (ADDRESS = bufferAddress) == -1L &&
 //#endif
-                Matrix4f_m00 = checkMatrix4f();
-                Matrix4d_m00 = checkMatrix4d();
-                Matrix4x3f_m00 = checkMatrix4x3f();
-                Matrix3f_m00 = checkMatrix3f();
-                Matrix3d_m00 = checkMatrix3d();
-                Matrix3x2f_m00 = checkMatrix3x2f();
-                Matrix2f_m00 = checkMatrix2f();
-                Vector4f_x = checkVector4f();
-                Vector4i_x = checkVector4i();
-                Vector3f_x = checkVector3f();
-                Vector3i_x = checkVector3i();
-                Vector2f_x = checkVector2f();
-                Vector2i_x = checkVector2i();
-            } catch (NoSuchFieldException e) {
-                throw new UnsupportedOperationException(e);
+                    Matrix2f_m00 == -1L &&
+                    Matrix3f_m00 == -1L &&
+                    Matrix3d_m00 == -1L &&
+                    Matrix4f_m00 == -1L &&
+                    Matrix4d_m00 == -1L &&
+                    Matrix4x3f_m00 == -1L &&
+                    Matrix3x2f_m00 == -1L &&
+                    Vector4f_x == -1L &&
+                    Vector4i_x == -1L &&
+                    Vector3f_x == -1L &&
+                    Vector3i_x == -1L &&
+                    Vector2f_x == -1L) {
+                throw new UnsupportedOperationException();
             }
-        }
-
-        //#ifdef __HAS_NIO__
-        private static long findBufferAddress() {
-            try {
-                return UNSAFE.objectFieldOffset(Buffer.class, "address"); //$NON-NLS-1$
-            } catch (Exception e) {
-                throw new UnsupportedOperationException(e);
-            }
-        }
-//#endif
-
-        private static long checkMatrix4f() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix4f.class.getDeclaredField("m00");
-            long Matrix4f_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 16; i++) {
-                int c = i >>> 2;
-                int r = i & 3;
-                f = Matrix4f.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix4f_m00 + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Matrix4f element offset");
-            }
-            return Matrix4f_m00;
-        }
-
-        private static long checkMatrix4d() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix4d.class.getDeclaredField("m00");
-            long Matrix4d_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 16; i++) {
-                int c = i >>> 2;
-                int r = i & 3;
-                f = Matrix4d.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix4d_m00 + (i << 3))
-                    throw new UnsupportedOperationException("Unexpected Matrix4d element offset");
-            }
-            return Matrix4d_m00;
-        }
-
-        private static long checkMatrix4x3f() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix4x3f.class.getDeclaredField("m00");
-            long Matrix4x3f_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 12; i++) {
-                int c = i / 3;
-                int r = i % 3;
-                f = Matrix4x3f.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix4x3f_m00 + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Matrix4x3f element offset");
-            }
-            return Matrix4x3f_m00;
-        }
-
-        private static long checkMatrix3f() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix3f.class.getDeclaredField("m00");
-            long Matrix3f_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 9; i++) {
-                int c = i / 3;
-                int r = i % 3;
-                f = Matrix3f.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix3f_m00 + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Matrix3f element offset");
-            }
-            return Matrix3f_m00;
-        }
-
-        private static long checkMatrix3d() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix3d.class.getDeclaredField("m00");
-            long Matrix3d_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 9; i++) {
-                int c = i / 3;
-                int r = i % 3;
-                f = Matrix3d.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix3d_m00 + (i << 3))
-                    throw new UnsupportedOperationException("Unexpected Matrix3d element offset");
-            }
-            return Matrix3d_m00;
-        }
-
-        private static long checkMatrix3x2f() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix3x2f.class.getDeclaredField("m00");
-            long Matrix3x2f_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 6; i++) {
-                int c = i / 2;
-                int r = i % 2;
-                f = Matrix3x2f.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix3x2f_m00 + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Matrix3x2f element offset");
-            }
-            return Matrix3x2f_m00;
-        }
-
-        private static long checkMatrix2f() throws NoSuchFieldException, SecurityException {
-            Field f = Matrix2f.class.getDeclaredField("m00");
-            long Matrix2f_m00 = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            for (int i = 1; i < 4; i++) {
-                int c = i / 2;
-                int r = i % 2;
-                f = Matrix2f.class.getDeclaredField("m" + c + r);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Matrix2f_m00 + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Matrix2f element offset");
-            }
-            return Matrix2f_m00;
-        }
-
-        private static long checkVector4f() throws NoSuchFieldException, SecurityException {
-            Field f = Vector4f.class.getDeclaredField("x");
-            long Vector4f_x = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            String[] names = {"y", "z", "w"};
-            for (int i = 1; i < 4; i++) {
-                f = Vector4f.class.getDeclaredField(names[i-1]);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Vector4f_x + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Vector4f element offset");
-            }
-            return Vector4f_x;
-        }
-
-        private static long checkVector4i() throws NoSuchFieldException, SecurityException {
-            Field f = Vector4i.class.getDeclaredField("x");
-            long Vector4i_x = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            String[] names = {"y", "z", "w"};
-            for (int i = 1; i < 4; i++) {
-                f = Vector4i.class.getDeclaredField(names[i-1]);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Vector4i_x + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Vector4i element offset");
-            }
-            return Vector4i_x;
-        }
-
-        private static long checkVector3f() throws NoSuchFieldException, SecurityException {
-            Field f = Vector3f.class.getDeclaredField("x");
-            long Vector3f_x = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            String[] names = {"y", "z"};
-            for (int i = 1; i < 3; i++) {
-                f = Vector3f.class.getDeclaredField(names[i-1]);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Vector3f_x + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Vector3f element offset");
-            }
-            return Vector3f_x;
-        }
-
-        private static long checkVector3i() throws NoSuchFieldException, SecurityException {
-            Field f = Vector3i.class.getDeclaredField("x");
-            long Vector3i_x = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            String[] names = {"y", "z"};
-            for (int i = 1; i < 3; i++) {
-                f = Vector3i.class.getDeclaredField(names[i-1]);
-                long offset = UNSAFE.objectFieldOffset(f);
-                if (offset != Vector3i_x + (i << 2))
-                    throw new UnsupportedOperationException("Unexpected Vector3i element offset");
-            }
-            return Vector3i_x;
-        }
-
-        private static long checkVector2f() throws NoSuchFieldException, SecurityException {
-            Field f = Vector2f.class.getDeclaredField("x");
-            long Vector2f_x = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            f = Vector2f.class.getDeclaredField("y");
-            long offset = UNSAFE.objectFieldOffset(f);
-            if (offset != Vector2f_x + (1 << 2))
-                throw new UnsupportedOperationException("Unexpected Vector2f element offset");
-            return Vector2f_x;
-        }
-
-        private static long checkVector2i() throws NoSuchFieldException, SecurityException {
-            Field f = Vector2i.class.getDeclaredField("x");
-            long Vector2i_x = UNSAFE.objectFieldOffset(f);
-            // Validate expected field offsets
-            f = Vector2i.class.getDeclaredField("y");
-            long offset = UNSAFE.objectFieldOffset(f);
-            if (offset != Vector2i_x + (1 << 2))
-                throw new UnsupportedOperationException("Unexpected Vector2i element offset");
-            return Vector2i_x;
-        }
-
-        private static java.lang.reflect.Field getDeclaredField(Class root, String fieldName) throws NoSuchFieldException {
-            Class type = root;
-            do {
-                try {
-                    java.lang.reflect.Field field = type.getDeclaredField(fieldName);
-                    return field;
-                } catch (NoSuchFieldException e) {
-                    type = type.getSuperclass();
-                } catch (SecurityException e) {
-                    type = type.getSuperclass();
-                }
-            } while (type != null);
-            throw new NoSuchFieldException(fieldName + " does not exist in " + root.getName() + " or any of its superclasses."); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         public static void put(Matrix4f m, long destAddr) {
