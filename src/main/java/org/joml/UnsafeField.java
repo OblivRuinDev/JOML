@@ -47,6 +47,7 @@ public class UnsafeField {
     public static final long Vector3i_x;
     public static final long Vector2f_x;
     public static final long Vector2i_x;
+    public static final long Quaternionf_w;
 
     static {
 //#ifdef __HAS_NIO__
@@ -65,6 +66,7 @@ public class UnsafeField {
         Vector3i_x = checkVector(Vector3i.class, Integer.BYTES, 3);
         Vector2f_x = checkVector(Vector2f.class, Float.BYTES, 2);
         Vector2i_x = checkVector(Vector2i.class, Integer.BYTES, 2);
+        Quaternionf_w = checkQuaternion(Quaternionf.class, Float.BYTES);
     }
 
     private static long checkMatrix(Class<?> clazz, int fieldBytes, int columns, int rows) {
@@ -98,5 +100,15 @@ public class UnsafeField {
                 throw new IllegalArgumentException("Invalid dim: " + dim);
         }
         return -1L;
+    }
+
+    private static long checkQuaternion(Class<?> clazz, int fieldBytes) {
+        long base = UnsafeUtil.IMPL.objectFieldOffset(clazz, "w");
+        if (UnsafeUtil.IMPL.objectFieldOffset(clazz, "x") != base + fieldBytes &&
+                UnsafeUtil.IMPL.objectFieldOffset(clazz, "y") != base + fieldBytes * 2 &&
+                UnsafeUtil.IMPL.objectFieldOffset(clazz, "z") != base + fieldBytes * 3) {
+            return -1L;
+        }
+        return base;
     }
 }

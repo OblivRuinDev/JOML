@@ -345,9 +345,16 @@ class JvmciCode {
       Set features = amd64arch.getFeatures();
       if (!features.contains(AMD64.CPUFeature.AVX) || !features.contains(AMD64.CPUFeature.FMA))
         throw new AssertionError("CPU lacks AVX or FMA support");
-      checkMatrix4f();
-      checkMatrix4d();
-      checkQuaternionf();
+      // UnsafeField has checked whether the fields are consecutive. If they are not consecutive, the value is -1L.
+      if (UnsafeField.Matrix4f_m00 != 16L) {
+        throw new AssertionError("invalid Matrix4f field offset");
+      }
+      if (UnsafeField.Matrix4d_m00 != 16L) {
+        throw new AssertionError("invalid Matrix4d field offset");
+      }
+      if (UnsafeField.Quaternionf_w != 16L) {
+        throw new AssertionError("invalid Quaternionf field offset");
+      }
       installCode(jvmciBackend, JvmciCode.class.getDeclaredMethod("__Matrix4f_mul", Matrix4f.class, Matrix4f.class, Matrix4f.class), _isWindows ? MATRIX4F_MUL_AVX_WINDOWS : MATRIX4F_MUL_AVX_LINUX);
       installCode(jvmciBackend, JvmciCode.class.getDeclaredMethod("__Matrix4d_mul", Matrix4d.class, Matrix4d.class, Matrix4d.class), _isWindows ? MATRIX4D_MUL_AVX_WINDOWS : MATRIX4D_MUL_AVX_LINUX);
       installCode(jvmciBackend, JvmciCode.class.getDeclaredMethod("__Matrix4f_invert", Matrix4f.class, Matrix4f.class), _isWindows ? MATRIX4F_INVERT_AVX_WINDOWS : MATRIX4F_INVERT_AVX_LINUX);
@@ -361,57 +368,6 @@ class JvmciCode {
       }
     }
     canUseJvmci = _canUseJvmci;
-  }
-  private static void checkMatrix4f() throws Throwable {
-    Field f;
-    sun.misc.Unsafe u = unsafeInstance();
-    for (int i = 0; i < 16; i++) {
-      int c = i >>> 2;
-      int r = i & 3;
-      f = Matrix4f.class.getDeclaredField("m" + c + r);
-      long offset = u.objectFieldOffset(f);
-      if (offset != 16 + (i << 2))
-        throw new AssertionError("invalid Matrix4f field offset");
-    }
-  }
-  private static void checkMatrix4d() throws Throwable {
-    Field f;
-    sun.misc.Unsafe u = unsafeInstance();
-    for (int i = 0; i < 16; i++) {
-      int c = i >>> 2;
-      int r = i & 3;
-      f = Matrix4d.class.getDeclaredField("m" + c + r);
-      long offset = u.objectFieldOffset(f);
-      if (offset != 16 + (i << 3))
-        throw new AssertionError("invalid Matrix4d field offset");
-    }
-  }
-  private static void checkQuaternionf() throws Throwable {
-    sun.misc.Unsafe u = unsafeInstance();
-    if (u.objectFieldOffset(Quaternionf.class.getDeclaredField("w")) != 16L ||
-        u.objectFieldOffset(Quaternionf.class.getDeclaredField("x")) != 20L ||
-        u.objectFieldOffset(Quaternionf.class.getDeclaredField("y")) != 24L ||
-        u.objectFieldOffset(Quaternionf.class.getDeclaredField("z")) != 28L)
-      throw new AssertionError("invalid Quaternionf field offset");
-  }
-  private static sun.misc.Unsafe unsafeInstance() throws SecurityException {
-    java.lang.reflect.Field[] fields = sun.misc.Unsafe.class.getDeclaredFields();
-    for (int i = 0; i < fields.length; i++) {
-      java.lang.reflect.Field field = fields[i];
-      if (!field.getType().equals(sun.misc.Unsafe.class))
-        continue;
-      int modifiers = field.getModifiers();
-      if (!(java.lang.reflect.Modifier.isStatic(modifiers) && java.lang.reflect.Modifier.isFinal(modifiers)))
-        continue;
-      field.setAccessible(true);
-      try {
-        return (sun.misc.Unsafe) field.get(null);
-      } catch (IllegalAccessException e) {
-        /* Ignore */
-      }
-      break;
-    }
-    throw new AssertionError("no sun.misc.Unsafe available");
   }
   private static void installCode(JVMCIBackend jvmciBackend, Method m, byte[] code) throws Throwable {
     ResolvedJavaMethod rm = jvmciBackend.getMetaAccess().lookupJavaMethod(m);
